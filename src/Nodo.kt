@@ -7,34 +7,20 @@ class Nodo (val nombre : String, val path : File) {
     val listaSubArchivos: MutableList<Nodo?> = mutableListOf()
     var letrasPalabraMasLarga : Int = 0
 
-    fun crearSubdirectorios(path: File): Nodo? {
+    fun crearSubDirectorios() : Nodo {
 
-        val directorio = path.listFiles()
-
-        if(directorio == null || directorio.isEmpty()){
-            return null
+        if(this.path.isFile){
+            return this
         }
 
-        if (path.isFile) {
-            val archivo = Nodo(path.name, path)
-            return archivo
-        }
-
-        val iterar : (path : File) -> Unit = { estructura ->
-            val subArchivo = crearSubdirectorios(estructura)
-            listaSubArchivos.add(subArchivo)
-        }
-
-        directorio.forEach(iterar)
-
-        val subArchivo = Nodo(path.name, path)
-        subArchivo.listaSubArchivos.addAll(this.listaSubArchivos.toMutableList())
-
-        return subArchivo
+        
     }
 
     //se puede mejorar usando el this
     fun calcularMedidaPalabraMasLarga() : Int{
+
+        println("[Nodo] Lugar actual: ${this.path}")
+
         if(this.listaSubArchivos.isEmpty()){
             return 0
         }
@@ -48,7 +34,7 @@ class Nodo (val nombre : String, val path : File) {
             if(nodo == null){
                 continue
             }
-            val mayorSubDirectorio = calcularMedidaPalabraMasLarga()
+            val mayorSubDirectorio = nodo.calcularMedidaPalabraMasLarga()
             palabraMasGrande = maxOf(mayorSubDirectorio, this.validarArchivo())
         }
         return palabraMasGrande
