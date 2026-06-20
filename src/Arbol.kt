@@ -27,6 +27,6 @@ class Arbol (val path : File){
     }
     fun imprimirParaREADMEsencillo(profundidad : Int) : String {
         this.iniciarMDReadME(profundidad)
-        return this.raiz.imprimirParaREADMEsencillo(this.mdreadme)?:"Arbol vacío"
+        return this.raiz.imprimirParaREADMEsencillo(this.mdreadme)
     }
 }

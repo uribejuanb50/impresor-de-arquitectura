@@ -67,16 +67,19 @@ class Nodo (val nombre : String, val path : File) {
         return nivelMasAlto
     }
 
-    fun imprimirParaREADMEsencillo(mdreadme : ArrayList<String>, nivel : Int = 0) : String? {
+    fun imprimirParaREADMEsencillo(md : ArrayList<String>, nivel : Int = 0) : String {
 
         if(this.path.isFile){
-            this.nombre + "\n"
+            println("[con1] Nivel: $nivel ")
+            return this.nombre + "\n"
         }
         if(this.listaSubArchivos.isEmpty()){
-            return null
+            println("[con2] Nivel: $nivel ")
+            return ""
         }
 
         var arquitectura : String = this.nombre +"/\n"
+        var mdreadme = md
 
         for((indice, subdirectorio) in this.listaSubArchivos.withIndex()){
 
@@ -87,21 +90,23 @@ class Nodo (val nombre : String, val path : File) {
 
                 if(nivel == 0) mdreadme[nivel] = "    " else mdreadme[nivel] = mdreadme[nivel - 1] + "    "
 
-                return arquitectura
+                //println("[if1] Nivel: $nivel | arq: $arquitectura")
+            }
+            else {
+                if (nivel == 0) {
+                    mdreadme[nivel] = "│   "
+                    arquitectura += "├── " + this.nombre + "/\n"
+                    //el nivel se coloca en 1 porque ya llega de por si en 0, es redundante colocar nivel + 1 o 1 porque da lo mismo
+                    arquitectura += mdreadme[nivel] + subdirectorio.imprimirParaREADMEsencillo(mdreadme, 1)//no preguntes solo interiorizalo
+                    //println("[if2] Nivel: $nivel | arq: $arquitectura")
+                } else {
+                    mdreadme[nivel] = mdreadme[nivel - 1] + "│   "
+                    arquitectura += mdreadme[nivel] + subdirectorio.imprimirParaREADMEsencillo(mdreadme, nivel + 1)
+                    //println("[if3] Nivel: $nivel | arq: $arquitectura")
+                }
             }
 
-            if(nivel == 0){
-                mdreadme[nivel] = "│   "
-                arquitectura += "├── " + this.nombre + "/\n"
-                //el nivel se coloca en 1 porque ya llega de por si en 0, es redundante colocar nivel + 1 o 1 porque da lo mismo
-                arquitectura += mdreadme[nivel] + subdirectorio.imprimirParaREADMEsencillo(mdreadme, 1)//no preguntes solo interiorizalo
-            }
-            else{
-                mdreadme[nivel] = mdreadme[nivel - 1] + "│   "
-                arquitectura += mdreadme[nivel] + subdirectorio.imprimirParaREADMEsencillo(mdreadme, nivel + 1)
-            }
-            return arquitectura
-
+            mdreadme = ArrayList(List(md.size) {""})
         }
 
         return arquitectura
