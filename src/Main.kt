@@ -12,7 +12,10 @@ fun main(args : Array<String>) {
     val arbol : Arbol = Arbol(raiz)
     arbol.crearSubDirectorios()
     val palabraMasLarga = arbol.nPalabraMasLarga()
-    println("[Main] palabra mas larga: $palabraMasLarga")
+    val profundidad = arbol.calcularProfundidad()
+    val READMEsencillo = arbol.imprimirParaREADMEsencillo(profundidad)
+    println("[Main] profundidad mas larga: $profundidad | nletras en palabra mas larga : $palabraMasLarga")
+    println("[Main] Main:\n$READMEsencillo")
 }
 
 fun verificarEntrada(args : Array<String>) : Array<String> {
