@@ -2,6 +2,15 @@ package src
 
 import java.io.File
 
+
+fun MutableList<Nodo>.toCustomString() : String{
+    var retorno : String = "["
+    for(nodo in this){
+        retorno += nodo.nombre + ", "
+    }
+    return "$retorno]"
+}
+
 class Nodo (val nombre : String, val path : File) {
 
     val listaSubArchivos: MutableList<Nodo> = mutableListOf()
@@ -17,7 +26,7 @@ class Nodo (val nombre : String, val path : File) {
 
         for(direccion in directorio){
 
-            val nodo : Nodo = Nodo(direccion.name, direccion)
+            val nodo = Nodo(direccion.name, direccion)
             val nodoActualizado = nodo.crearSubDirectorios()
 
             if(nodoActualizado != null)
@@ -77,14 +86,18 @@ class Nodo (val nombre : String, val path : File) {
             return
         }
 
-        this.listaSubArchivos.reverse()
+        println("[Nodo] previo a la impresión : ${this.listaSubArchivos.toCustomString()}")
+        this.listaSubArchivos.sortWith(compareByDescending<Nodo> {it.path.isDirectory}.thenBy { it.nombre })
+        println("[Nodo] post a la impresión : ${this.listaSubArchivos.toCustomString()}")
 
         for (subdirectorio in this.listaSubArchivos){
             subdirectorio.reversarListas()
         }
+
+        return
     }
     fun impresionUltraSencilla(nivel : Int = 0) : String {
-        val espacio : String = "   "
+        val espacio = "   "
 
         if(this.path.isFile){
             return espacio.repeat(nivel) + this.nombre + "\n"
@@ -112,7 +125,7 @@ class Nodo (val nombre : String, val path : File) {
             return mdreadme[nivel - 1] + conector + this.nombre + "/\n"
         }
 
-        var arquitectura : String = ""
+        var arquitectura = ""
 
         if(nivel == 0){
             arquitectura = this.nombre + "/\n"
@@ -135,6 +148,33 @@ class Nodo (val nombre : String, val path : File) {
             arquitectura += subdirectorio.imprimirParaREADMEsencillo(mdreadme, nivel + 1, ultimoPuesto)
         }
         return arquitectura
+    }
+
+    fun buscarArchivosPorNombreYCondicion(
+        busqueda : String,
+        condicion : (nombre : String, busqueda : String) -> Boolean
+    ): ArrayList<String>?{
+
+        if(condicion(this.path.name, busqueda)){
+            return arrayListOf(this.path.path)
+        }
+        if(this.path.isFile){
+            return null
+        }
+        if(this.listaSubArchivos.isEmpty()){
+            return null
+        }
+
+        var retorno : ArrayList<String> = arrayListOf()
+
+        for(subdirectorios in this.listaSubArchivos){
+            val listaRetornante = subdirectorios.buscarArchivosPorNombreYCondicion(busqueda, condicion)
+
+            if(listaRetornante != null)
+                retorno.addAll(listaRetornante)
+        }
+
+        return retorno
     }
 
     init{
