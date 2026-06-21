@@ -74,21 +74,38 @@ class Arbol (val path : File){
     }
 
     fun generarREADME(arquitectura : String, descripcion : String) : String{
-
         var readme = ""
-
         readme += "# [Nombre del proyecto]\n"
         readme += "> [Una línea que explica qué hace el proyecto. Clara, directa, sin tecnicismos innecesarios.]\n"
         readme += "\n"
         readme += "![[aqui va texto entre corchetes que es la desc de la imagen (obligatoria por SEO)]]([link imagen]\n"
         readme += "\n"
         readme += "---"
+        readme += "\n"
+        readme += "## DEMO"
         readme += "[link a demo o bloque de UI o respuesta de terminal (```shell //codigo// ```]"
-        readme += ""
+        readme += "\n"
+        readme += "---"
+        readme += "\n"
+        readme += "## Configuracion"
+        readme += "[Solo si aplica. Variables de entorno, archivos de config, flags, etc.]"
+        readme += "\n"
+        readme += "---"
+        readme += "\n"
+        readme += "## Estructura del proyecto"
+        readme += arquitectura
+        readme += "\n"
+        readme += descripcion
+        readme += "\n"
+        readme += "---"
+        readme += "\n"
+        readme += "## Contribuir"
+        readme += "[Habla de como la gente puede contribuir]"
 
-
+        return readme
     }
 }
+
 @JvmName("toCustomStringArrayListString")
 fun ArrayList<String>?.toCustomString() : String {
     if(this == null){

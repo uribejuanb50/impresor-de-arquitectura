@@ -61,12 +61,14 @@ fun manejarArbol(raiz: File, opcion: Int, args : Array<String>) : String {
             val profundidad = arbol.calcularProfundidad()
             val arquitectura = arbol.generarArquitectura(profundidad)
             val descripciones = arbol.organizarDescripciones()
+            arbol.generarREADME(arquitectura, descripciones)
         }
 
         2 -> {
             val profundidad = arbol.calcularProfundidad()
             val arquitectura = arbol.generarArquitectura(profundidad, true)
             val descripciones = arbol.organizarDescripciones()
+            arbol.generarREADME(arquitectura, descripciones)
         }
 
         3 -> {
