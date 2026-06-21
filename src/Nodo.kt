@@ -1,15 +1,5 @@
 package src
-
 import java.io.File
-
-
-fun MutableList<Nodo>.toCustomString() : String{
-    var retorno : String = "["
-    for(nodo in this){
-        retorno += nodo.nombre + ", "
-    }
-    return "$retorno]"
-}
 
 class Nodo (val nombre : String, val path : File) {
 
@@ -94,25 +84,24 @@ class Nodo (val nombre : String, val path : File) {
 
         return
     }
-    fun impresionUltraSencilla(nivel : Int = 0) : String {
-        val espacio = "   "
+    fun impresionUltraSencilla(espacio : String = "   ", nivel : Int = 0) : String {
 
         if(this.path.isFile){
             return espacio.repeat(nivel) + this.nombre + "\n"
         }
         if(this.listaSubArchivos.isEmpty()){
-            return "\n"
+            return espacio.repeat(nivel) + this.nombre + "\n"
         }
         var devolver : String = espacio.repeat(nivel) + this.nombre + "/\n"
 
         for(subdirectorio in this.listaSubArchivos){
-            devolver += subdirectorio.impresionUltraSencilla(nivel + 1)
+            devolver += subdirectorio.impresionUltraSencilla(espacio,nivel + 1)
         }
 
         return devolver
     }
 
-    fun imprimirParaREADMEsencillo(mdreadme : ArrayList<String>, nivel : Int = 0, flagUltimoPuesto : Boolean = false) : String {
+    fun generarArquitectura(mdreadme : ArrayList<String>, nivel : Int = 0, flagUltimoPuesto : Boolean = false) : String {
 
         if(this.path.isFile){
             val conector = if(flagUltimoPuesto) "└── " else "├── "
@@ -143,7 +132,7 @@ class Nodo (val nombre : String, val path : File) {
             if(nivel > 0)
                 mdreadme[nivel] = mdreadme[nivel - 1] + (if(flagUltimoPuesto) "    " else "│   ")
 
-            arquitectura += subdirectorio.imprimirParaREADMEsencillo(mdreadme, nivel + 1, ultimoPuesto)
+            arquitectura += subdirectorio.generarArquitectura(mdreadme, nivel + 1, ultimoPuesto)
         }
         return arquitectura
     }
@@ -174,9 +163,39 @@ class Nodo (val nombre : String, val path : File) {
 
         return retorno
     }
+
+    fun devolverPadresConHijos() : ArrayList<String>{
+        if(this.path.isFile){
+            return arrayListOf()
+        }
+        if(this.listaSubArchivos.isEmpty())
+            return arrayListOf()
+
+        val lista : ArrayList<String> = arrayListOf()
+        lista.add(this.nombre + "/")
+
+        for(subdirectorio in this.listaSubArchivos){
+            val strSubdirectorio = if(subdirectorio.path.isDirectory) "${subdirectorio.nombre}/" else subdirectorio.nombre
+            lista.add(strSubdirectorio)
+        }
+        for(subdirectorio in this.listaSubArchivos){
+            lista.addAll(subdirectorio.devolverPadresConHijos())
+        }
+        return lista
+    }
+
+    init{
+        //print("[Nodo] Nombre: ${this.nombre} | path : ${this.path}")
+    }
 }
 
-
+fun MutableList<Nodo>.toCustomString() : String{
+    var retorno : String = "["
+    for(nodo in this){
+        retorno += nodo.nombre + ", "
+    }
+    return "$retorno]"
+}
 
 
 

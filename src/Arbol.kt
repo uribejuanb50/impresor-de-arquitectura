@@ -31,10 +31,14 @@ class Arbol (val path : File){
         this.profundidad = profundidad
         return profundidad
     }
-    fun imprimirParaREADMEsencillo(profundidad : Int) : String {
+    fun generarArquitecturaSencilla() : String {
+        this.raiz.reversarListas()
+        return this.raiz.impresionUltraSencilla()
+    }
+    fun generarArquitectura(profundidad : Int) : String {
         this.iniciarMDReadME(profundidad)
         this.raiz.reversarListas()
-        return this.raiz.imprimirParaREADMEsencillo(this.mdreadme)
+        return this.raiz.generarArquitectura(this.mdreadme)
     }
 
     fun buscarArchivosPorNombre(busqueda : String, condicion : String) : String{
@@ -45,12 +49,37 @@ class Arbol (val path : File){
             throw IllegalArgumentException("[Arbol] Las condiciones de busquedas actuales son ${this.mapaCondiciones.keys}")
         }
     }
-}
 
+    fun organizarDescripciones() : String {
+
+        val mdinamica = mutableSetOf<String>()
+        val directorios = this.raiz.devolverPadresConHijos()
+
+        var retorno = "## " + directorios.first() +"\n"
+        mdinamica.add(directorios.first())
+
+        for(directorio in directorios.drop(1)){
+            if(directorio in mdinamica)
+                retorno += "## $directorio\n"
+
+            else
+                retorno += "### $directorio\n"
+                mdinamica.add(directorio)
+        }
+
+        return retorno
+    }
+
+    fun generarDescripciones(){
+
+    }
+}
+@JvmName("toCustomStringArrayListString")
 fun ArrayList<String>?.toCustomString() : String {
     if(this == null){
         return "NoEncontrado"
     }
+
     var retorno = "["
 
     for((indice, str) in this.withIndex()){
@@ -60,6 +89,17 @@ fun ArrayList<String>?.toCustomString() : String {
         else
             retorno += str
     }
-
     return "$retorno]"
+}
+@JvmName("toCustomStringArrayListFile")
+fun ArrayList<File>.toCustomString() : String {
+
+    val transformacion = { path : File ->
+        if(path.isDirectory)
+            "${path.name}/"
+        else
+            "${path.name}"
+    }
+
+    return this.map(transformacion).toCollection(ArrayList()).toCustomString()
 }

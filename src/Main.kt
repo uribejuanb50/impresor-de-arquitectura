@@ -19,6 +19,10 @@ fun verificarEntrada(args : Array<String>) : Int {
     if(args.size == 1) //1 argumento, devuelve el arbol sencillo de readme, no el baseline del ultra sencillo
         return 1
 
+    if(args[1] == "prueba"){
+        return -1
+    }
+
     if(args.size == 3) //3 argumentos, devuelve la ubicación de un archivo, según la comparacion elegida
         return 3
 
@@ -47,7 +51,7 @@ fun manejarArbol(raiz: File, opcion: Int, args : Array<String>) : String {
     return "[Main] " + when(opcion) {
         1 -> {
             val profundidad = arbol.calcularProfundidad()
-            "Estructura para el README.md:\n" + arbol.imprimirParaREADMEsencillo(profundidad)
+            "Estructura para el README.md:\n" + arbol.generarArquitectura(profundidad)
         }
 
         3 -> {
@@ -55,7 +59,9 @@ fun manejarArbol(raiz: File, opcion: Int, args : Array<String>) : String {
             val condicionBusqueda = args[2]
             "Ubicación(es) de aparición: " + arbol.buscarArchivosPorNombre(busqueda, condicionBusqueda)
         }
-
+        -1 ->{
+            arbol.generarArquitecturaSencilla() + "\nDirectorio aplanado:" + arbol.organizarDescripciones()
+        }
         else -> "[Main]No existe esta opción aún"
     }
 }
