@@ -35,10 +35,10 @@ class Arbol (val path : File){
         this.raiz.reversarListas()
         return this.raiz.impresionUltraSencilla()
     }
-    fun generarArquitectura(profundidad : Int) : String {
+    fun generarArquitectura(profundidad : Int, mostrarOcultos : Boolean = false) : String {
         this.iniciarMDReadME(profundidad)
         this.raiz.reversarListas()
-        return this.raiz.generarArquitectura(this.mdreadme)
+        return this.raiz.generarArquitectura(this.mdreadme, mostrarEscondidos = mostrarOcultos)
     }
 
     fun buscarArchivosPorNombre(busqueda : String, condicion : String) : String{
@@ -60,7 +60,7 @@ class Arbol (val path : File){
 
         for(directorio in directorios.drop(1)){
             if(directorio in mdinamica)
-                retorno += "## $directorio\n"
+                retorno += "\n## $directorio\n"
 
             else
                 retorno += "### $directorio\n"

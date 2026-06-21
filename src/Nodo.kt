@@ -101,12 +101,21 @@ class Nodo (val nombre : String, val path : File) {
         return devolver
     }
 
-    fun generarArquitectura(mdreadme : ArrayList<String>, nivel : Int = 0, flagUltimoPuesto : Boolean = false) : String {
+    fun generarArquitectura(
+        mdreadme : ArrayList<String>,
+        nivel : Int = 0,
+        flagUltimoPuesto : Boolean = false,
+        mostrarEscondidos : Boolean = false
+    ) : String {
 
         if(this.path.isFile){
             val conector = if(flagUltimoPuesto) "└── " else "├── "
             return mdreadme[nivel - 1] + conector + this.nombre + "\n"
         }
+
+        if(!mostrarEscondidos && this.path.isHidden)
+            return ""
+
         if(this.listaSubArchivos.isEmpty()){
             val conector = if(flagUltimoPuesto) "└── " else "├── "
             return mdreadme[nivel - 1] + conector + this.nombre + "/\n"
@@ -132,7 +141,7 @@ class Nodo (val nombre : String, val path : File) {
             if(nivel > 0)
                 mdreadme[nivel] = mdreadme[nivel - 1] + (if(flagUltimoPuesto) "    " else "│   ")
 
-            arquitectura += subdirectorio.generarArquitectura(mdreadme, nivel + 1, ultimoPuesto)
+            arquitectura += subdirectorio.generarArquitectura(mdreadme, nivel + 1, ultimoPuesto, mostrarEscondidos)
         }
         return arquitectura
     }
