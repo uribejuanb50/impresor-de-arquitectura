@@ -6,26 +6,23 @@ import java.io.File
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main(args : Array<String>) {
 
-    val args = verificarEntrada(args)
+    val opcion = verificarEntrada(args)
     val raiz = generarPath(args)
-
-    val arbol : Arbol = Arbol(raiz)
-    arbol.crearSubDirectorios()
-    val palabraMasLarga = arbol.nPalabraMasLarga()
-    val profundidad = arbol.calcularProfundidad()
-    val READMEsencillo = arbol.imprimirParaREADMEsencillo(profundidad)
-    println("[Main] profundidad mas larga: $profundidad | nletras en palabra mas larga : $palabraMasLarga")
-    println("[Main] Main:\n$READMEsencillo")
+    val resultado = manejarArbol(raiz, opcion, args)
+    println(resultado)
 }
 
-fun verificarEntrada(args : Array<String>) : Array<String> {
+fun verificarEntrada(args : Array<String>) : Int {
     if(args.isEmpty())
         throw IllegalArgumentException("[Main] Los argumentos de entrada están vacíos mani")
 
-    if(args.size > 1)
-        throw IllegalArgumentException("[Main] Se espera un solo argumento en la terminal")
+    if(args.size == 1) //1 argumento, devuelve el arbol sencillo de readme, no el baseline del ultra sencillo
+        return 1
 
-    return args
+    if(args.size == 3) //3 argumentos, devuelve la ubicación de un archivo, según la comparacion elegida
+        return 3
+
+    throw IllegalArgumentException("[Main] Los argumentos exceden la cantidad máxima")
 }
 
 fun generarPath(args : Array<String>) : File {
@@ -40,4 +37,25 @@ fun generarPath(args : Array<String>) : File {
     println("[Main] Se está imprimiendo la arquitectura de ${path.path}")
 
     return path
+}
+
+fun manejarArbol(raiz: File, opcion: Int, args : Array<String>) : String {
+    val arbol = Arbol(raiz)
+    arbol.crearSubDirectorios()
+    arbol.nPalabraMasLarga()
+
+    return "[Main] " + when(opcion) {
+        1 -> {
+            val profundidad = arbol.calcularProfundidad()
+            "Estructura para el README.md:\n" + arbol.imprimirParaREADMEsencillo(profundidad)
+        }
+
+        3 -> {
+            val busqueda = args[1]
+            val condicionBusqueda = args[2]
+            "Ubicación(es) de aparición: " + arbol.buscarArchivosPorNombre(busqueda, condicionBusqueda)
+        }
+
+        else -> "[Main]No existe esta opción aún"
+    }
 }
