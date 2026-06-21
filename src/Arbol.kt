@@ -38,8 +38,12 @@ class Arbol (val path : File){
     }
 
     fun buscarArchivosPorNombre(busqueda : String, condicion : String) : String{
-        val metodoBusqueda = this.mapaCondiciones.getValue(condicion)
-        return this.raiz.buscarArchivosPorNombreYCondicion(busqueda, metodoBusqueda).toCustomString()
+        return try {
+            val metodoBusqueda = this.mapaCondiciones.getValue(condicion)
+            this.raiz.buscarArchivosPorNombreYCondicion(busqueda, metodoBusqueda).toCustomString()
+        } catch (e: Exception) {
+            throw IllegalArgumentException("[Arbol] Las condiciones de busquedas actuales son ${this.mapaCondiciones.keys}")
+        }
     }
 }
 
