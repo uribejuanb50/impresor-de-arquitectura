@@ -49,8 +49,15 @@ fun validarFlags(args : Array<String>) : Pair<Map<String, Any?>, ArrayList<Strin
             "--ocultos" -> diccionarioFlags["ocultos"] = true
             "--reversar" -> diccionarioFlags["reversar"] = true
             "--prueba" -> diccionarioFlags["prueba"] = true
-            "--README" -> diccionarioFlags["README"] = true
-            "--descripcion" -> diccionarioFlags["descripcion"] = true
+            "--README" -> {
+                val siguiente = args.getOrNull(indice + 1)
+                diccionarioFlags["README"] = true
+
+                if(siguiente == "desc") {
+                    diccionarioFlags["descripcion"] = true
+                }
+
+            }
             "--recortar" -> {
                 val siguiente = args.getOrNull(indice + 1)?.toIntOrNull()
                 val siguienteEliminar = args.getOrNull(indice + 1)  //este es para eliminar el numero de los args
@@ -109,8 +116,7 @@ fun validarFlags(args : Array<String>) : Pair<Map<String, Any?>, ArrayList<Strin
                     --recortar n                //recorta palabras hasta ese tamaño (falta añadir compatibilidad con simple)
                     --prueba                    //lanzar prueba
                     --nivelMax n                //hacerlo hasta el nivel max
-                    --README                    //crear README
-                    --descripcion               //Genera una descripcion padre hijo de cada elemento del arbol
+                    --README desc               //crear README (desc es opcional para activar la descripcion)
                     --toArchivo "path_archivo"  //guardar en archivo
                     --ayuda                     //Imprime este txt
                 """.trimIndent()
@@ -204,7 +210,8 @@ fun manejarArbol(raiz: File, opcion: Int, args : ArrayList<String>, flags : Map<
                 else
                     arbol.generarArquitectura(profundidad, ocultos)
 
-            procesarFlags(arbol, arquitectura, recortar, readMe, descripcion, toArchivo)
+            val retorno = procesarFlags(arbol, ocultos, arquitectura, recortar, readMe, descripcion, toArchivo)
+            
         }
         else -> {
             System.err.println("[Main] ¿Cómo llegaste aquí? La cagué re duro en algo")
@@ -214,6 +221,7 @@ fun manejarArbol(raiz: File, opcion: Int, args : ArrayList<String>, flags : Map<
 
 fun procesarFlags(
     arbol : Arbol,
+    ocultos : Boolean,
     arquitectura : String,
     recortar : Int?,
     readMe : Boolean,
@@ -221,7 +229,6 @@ fun procesarFlags(
     toArchivo : File?
 ) : String{
 
-    lateinit var desc : String
     val nuevaArq =
         if(recortar != null){
             val regex = Regex("""(?<= )(?=[^ /.\n]+[/.])|(?<=[^ /.\n])(?=[/.])""")
@@ -244,7 +251,14 @@ fun procesarFlags(
             arquitectura
         }
 
-    println(nuevaArq)
+    val nuevaDescripcion =
+        if(descripcion)
+            arbol.organizarDescripciones(ocultos)
+        else
+            ""
 
-    return ""
+    if(readMe)
+        return arbol.generarREADME(arquitectura, nuevaDescripcion)
+
+    return nuevaArq
 }

@@ -80,7 +80,7 @@ class Arbol (val path : File){
     }
 
     //hace la estructura de un readme
-    fun generarREADME(arquitectura : String, descripcion : String?) : String{
+    fun generarREADME(arquitectura : String, descripcion : String) : String{
         var readme = ""
         readme += "# [Nombre del proyecto]\n"
         readme += "> [Una línea que explica qué hace el proyecto. Clara, directa, sin tecnicismos innecesarios.]\n"
@@ -103,7 +103,7 @@ class Arbol (val path : File){
         readme += "\n"
         readme += arquitectura
         readme += "\n"
-        readme += descripcion ?: ""
+        readme += descripcion
         readme += "\n"
         readme += "---"
         readme += "\n"
