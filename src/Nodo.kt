@@ -234,15 +234,6 @@ class Nodo (val nombre : String, val path : File) {
     }
 }
 
-fun MutableList<Nodo>.toCustomString() : String{
-    var retorno : String = "["
-    for(nodo in this){
-        retorno += nodo.nombre + ", "
-    }
-    return "$retorno]"
-}
-
-
 
 
 

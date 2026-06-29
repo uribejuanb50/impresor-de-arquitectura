@@ -4,9 +4,24 @@ import java.io.File
 
 //ARRAYLIST
 fun ArrayList<String?>?.toCustomString() : String {
-    if(this)
-}
+    if(this == null)
+        return "[Vacío]"
 
+    var retorno = "["
+
+    for((indice, str) in this.withIndex()){
+
+        if(str == null)
+            retorno += "null"
+        else
+            retorno += str
+
+        if(indice != this.lastIndex)
+            retorno += ", "
+    }
+
+    return "$retorno]"
+}
 
 @JvmName("toCustomStringArrayListString")
 fun ArrayList<String>?.toCustomString() : String {
@@ -47,4 +62,19 @@ fun MutableList<Nodo>.toCustomString() : String{
         retorno += nodo.nombre + ", "
     }
     return "$retorno]"
+}
+
+fun ArrayList<String>?.unirString() : String {
+
+    if(this == null){
+        return "Vacio"
+    }
+
+    var retorno = ""
+
+    for(str in this){
+        retorno += str
+    }
+
+    return retorno
 }

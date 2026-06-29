@@ -28,6 +28,10 @@ class Arbol (val path : File){
         return this.raiz.calcularMedidaPalabraMasLarga()
     }
 
+    fun reversarListas(){
+        this.raiz.reversarListas()
+    }
+
     //la profundidad total del arbol
     fun calcularProfundidad() : Int{
         val profundidad = this.raiz.calcularProfundidad()
@@ -36,13 +40,11 @@ class Arbol (val path : File){
     }
     //el baseline
     fun generarArquitecturaSencilla() : String {
-        this.raiz.reversarListas()
         return this.raiz.impresionUltraSencilla()
     }
     //el que genera con rayitas y bonito con eso
     fun generarArquitectura(profundidad : Int, mostrarOcultos : Boolean = false) : String {
         this.iniciarMDReadME(profundidad)
-        this.raiz.reversarListas()
         return this.raiz.generarArquitectura(this.mdreadme, mostrarEscondidos = mostrarOcultos)
     }
 
@@ -78,7 +80,7 @@ class Arbol (val path : File){
     }
 
     //hace la estructura de un readme
-    fun generarREADME(arquitectura : String, descripcion : String) : String{
+    fun generarREADME(arquitectura : String, descripcion : String?) : String{
         var readme = ""
         readme += "# [Nombre del proyecto]\n"
         readme += "> [Una línea que explica qué hace el proyecto. Clara, directa, sin tecnicismos innecesarios.]\n"
@@ -101,7 +103,7 @@ class Arbol (val path : File){
         readme += "\n"
         readme += arquitectura
         readme += "\n"
-        readme += descripcion
+        readme += descripcion ?: ""
         readme += "\n"
         readme += "---"
         readme += "\n"
@@ -117,32 +119,3 @@ class Arbol (val path : File){
     }
 }
 
-@JvmName("toCustomStringArrayListString")
-fun ArrayList<String>?.toCustomString() : String {
-    if(this == null){
-        return "NoEncontrado"
-    }
-
-    var retorno = "["
-
-    for((indice, str) in this.withIndex()){
-
-        if(indice != this.lastIndex)
-            retorno += "$str, "
-        else
-            retorno += str
-    }
-    return "$retorno]"
-}
-@JvmName("toCustomStringArrayListFile")
-fun ArrayList<File>.toCustomString() : String {
-
-    val transformacion = { path : File ->
-        if(path.isDirectory)
-            "${path.name}/"
-        else
-            "${path.name}"
-    }
-
-    return this.map(transformacion).toCollection(ArrayList()).toCustomString()
-}

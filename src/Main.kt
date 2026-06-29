@@ -6,10 +6,10 @@ import kotlin.system.exitProcess
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main(args : Array<String>) {
-
+    val (flags, args) = validarFlags(args)
     val opcion = verificarEntrada(args)
     val raiz = generarPath(args)
-    val resultado = manejarArbol(raiz, opcion, args)
+    val resultado = manejarArbol(raiz, opcion, args, flags)
     println(resultado)
 }
 
@@ -19,17 +19,22 @@ fun main(args : Array<String>) {
 fun validarFlags(args : Array<String>) : Pair<Map<String, Any?>, ArrayList<String>> {
 
     val opcionesValidas = listOf(
-        "--escondidos", "--reversar", "--recortar", "--prueba", "--nivelMax", "--README", "--toArchivo", "--ayuda"
+        "--simple","--ocultos", "--reversar", "--recortar", "--prueba", "--nivelMax", "--README", "--toArchivo", "--ayuda", "--descripcion"
         )
+
     val nuevosArgs : ArrayList<String> = arrayListOf()
+    val argsRestar : ArrayList<String> = arrayListOf()
+
     val diccionarioFlags = mutableMapOf<String, Any?>(
-        "escondidos" to false,
+        "simple" to false,
+        "ocultos" to false,
         "reversar" to false,
-        "recortar" to false,
+        "recortar" to null,
         "prueba" to true,
         "nivelMax" to null,
         "README" to false,
-        "toArchivo" to null
+        "toArchivo" to null,
+        "descripcion" to false
     )
 
     for((indice, argumento) in args.withIndex()){
@@ -40,48 +45,72 @@ fun validarFlags(args : Array<String>) : Pair<Map<String, Any?>, ArrayList<Strin
         }
 
         when(argumento){
-            "--escondidos" -> diccionarioFlags["escondidos"] = true
-
+            "--simple" -> diccionarioFlags["simple"] = true
+            "--ocultos" -> diccionarioFlags["ocultos"] = true
             "--reversar" -> diccionarioFlags["reversar"] = true
-            "--recortar" -> diccionarioFlags["recortar"] = true
             "--prueba" -> diccionarioFlags["prueba"] = true
             "--README" -> diccionarioFlags["README"] = true
+            "--descripcion" -> diccionarioFlags["descripcion"] = true
+            "--recortar" -> {
+                val siguiente = args.getOrNull(indice + 1)?.toIntOrNull()
+                val siguienteEliminar = args.getOrNull(indice + 1)  //este es para eliminar el numero de los args
+                                                                            //para que no de problemas de cantidad de args y se meta en
+                                                                            //otras opciones
+
+                if(siguiente == null || siguienteEliminar == null) {
+                    System.err.println("[Main] Después de --recortar no había número")
+                    exitProcess(1)
+                }
+
+                diccionarioFlags["recortar"] = siguiente
+                argsRestar.add(siguienteEliminar)
+            }
             "--nivelMax" -> {
                 val siguiente = args.getOrNull(indice + 1)?.toIntOrNull()
+                val siguienteEliminar = args.getOrNull(indice + 1)  //este es para eliminar el numero de los args
+                                                                            //para que no de problemas de cantidad de args y se meta en
+                                                                            //otras opciones
 
-                if(siguiente == null) {
-                    println("[Main] después de --nivelMax no había número")
+                if(siguiente == null || siguienteEliminar == null) {
+                    System.err.println("[Main] después de --nivelMax no había número")
                     exitProcess(1)
                 }
 
                 diccionarioFlags["nivelMax"] = siguiente
+                argsRestar.add(siguienteEliminar)
             }
             "--toArchivo" -> {
                 val siguiente = args.getOrNull(indice + 1)
+                val siguienteEliminar = args.getOrNull(indice + 1)  //este es para eliminar el numero de los args
+                                                                            //para que no de problemas de cantidad de args y se meta en
+                                                                            //otras opciones
 
-                if(siguiente == null){
-                    println("[Main] Hubo un error al leer el archivo después de --toArchivo")
+                if(siguiente == null || siguienteEliminar == null) {
+                    System.err.println("[Main] Hubo un error al leer el archivo después de --toArchivo")
                     exitProcess(1)
                 }
 
                 val path = File(siguiente)
-                if(!path.exists()){
-                    println("[Main] el archivo a escribir no existe")
+                if(!path.exists() && !path.isFile){
+                    System.err.println("[Main] el path a escribir no existe o no es un archivo")
                     exitProcess(1)
                 }
 
                 diccionarioFlags["toArchivo"] = path
+                argsRestar.add(siguiente)
             }
             "--ayuda" -> {
                 println(
                     """
                     flags:
-                    --escondidos                //mostrar carpetas y archivos ocultos
+                    --simple                    //imprime el arbol sin caracteres especiales
+                    --ocultos                   //mostrar carpetas y archivos ocultos
                     --reversar                  //reversar las listas internas y mostrar primero archivos que directorios
-                    --recortar                  //recorta palabras
+                    --recortar n                //recorta palabras hasta ese tamaño (falta añadir compatibilidad con simple)
                     --prueba                    //lanzar prueba
                     --nivelMax n                //hacerlo hasta el nivel max
                     --README                    //crear README
+                    --descripcion               //Genera una descripcion padre hijo de cada elemento del arbol
                     --toArchivo "path_archivo"  //guardar en archivo
                     --ayuda                     //Imprime este txt
                 """.trimIndent()
@@ -93,38 +122,43 @@ fun validarFlags(args : Array<String>) : Pair<Map<String, Any?>, ArrayList<Strin
 
     }
 
+    val iniciarRestar = 0
+    var iterador = 0
+    while (iterador <= nuevosArgs.size){
+        if(argsRestar.isEmpty())
+            break
+
+        if(nuevosArgs[iterador] == argsRestar[iniciarRestar]){
+            nuevosArgs.removeAt(iterador)
+            argsRestar.removeAt(iniciarRestar)
+        }
+        else
+            iterador++
+    }
+
     return Pair(diccionarioFlags, nuevosArgs)
 }
 
-fun verificarEntrada(args : Array<String>) : Int {
-    if(args.isEmpty())
-        throw IllegalArgumentException("[Main] Los argumentos de entrada están vacíos mani")
+fun verificarEntrada(args: ArrayList<String>) : Int{
+    if(args.isEmpty()){
+        System.err.println("[Main] los argumentos están vacíos.")
+        exitProcess(1)
+    }
 
-    if(args.first() == "ayuda" || args.first() == "help")
-        throw IllegalArgumentException(
-            "[Main] los comandos disponibles son:\n"
-            + "TODO"
-        )
 
-    if(args.size == 1) //1 argumento, devuelve el arbol sencillo de readme, no el baseline del ultra sencillo
-        return 1
+    return when(args.size){
+        //un argumento, simplemente el arbol
+        1 -> 1
+        3 -> 3
+        else -> {
+            System.err.println("[Main] Los argumentos recibidos no sirven")
+            exitProcess(1)
+        }
+    }
 
-    if(args[1] == "--prueba")
-        return -1
-
-    if(args.size == 2 && args.contains("--ocultos"))
-        return 2
-
-    if(args.size == 2 && args.contains("--eliminar"))
-        return 4
-
-    if(args.size == 3) //3 argumentos, devuelve la ubicación de un archivo, según la comparacion elegida
-        return 3
-
-    throw IllegalArgumentException("[Main] Los argumentos exceden la cantidad máxima")
 }
 
-fun generarPath(args : Array<String>) : File {
+fun generarPath(args : ArrayList<String>) : File {
     val path = File(args.first())
 
     if(!path.exists())
@@ -138,39 +172,79 @@ fun generarPath(args : Array<String>) : File {
     return path
 }
 
-fun manejarArbol(raiz: File, opcion: Int, args : Array<String>) : String {
+fun manejarArbol(raiz: File, opcion: Int, args : ArrayList<String>, flags : Map<String, Any?>) : String {
     val arbol = Arbol(raiz)
     arbol.crearSubDirectorios()
     arbol.nPalabraMasLarga()
 
+    val profundidad = arbol.calcularProfundidad()
+
+    val prueba = flags["prueba"] as? Boolean ?: false
+    if(prueba)
+        println("prueba")//lanzar prueba (hacer)
+
+    val reversar = flags["reversar"] as? Boolean ?: false
+    if(reversar)
+        arbol.reversarListas()
+
+    val simple = flags["simple"] as? Boolean ?: false
+    val ocultos = flags["ocultos"] as? Boolean ?: false
+    val descripcion = flags["descripcion"] as? Boolean ?: false
+    val readMe = flags["README"] as? Boolean ?: false
+    val recortar = flags["recortar"] as? Int
+    val nivelMax = flags["nivelMax"] as? Int
+    val toArchivo = flags["toArchivo"] as? File
+
+
     return "[Main] " + when(opcion) {
         1 -> {
-            val profundidad = arbol.calcularProfundidad()
-            val arquitectura = arbol.generarArquitectura(profundidad)
-            val descripciones = arbol.organizarDescripciones()
-            arbol.generarREADME(arquitectura, descripciones)
-        }
+            val arquitectura =
+                if(simple)
+                    arbol.generarArquitecturaSencilla()
+                else
+                    arbol.generarArquitectura(profundidad, ocultos)
 
-        2 -> {
-            val profundidad = arbol.calcularProfundidad()
-            val arquitectura = arbol.generarArquitectura(profundidad, true)
-            val descripciones = arbol.organizarDescripciones(true)
-            arbol.generarREADME(arquitectura, descripciones)
+            procesarFlags(arbol, arquitectura, recortar, readMe, descripcion, toArchivo)
         }
-
-        3 -> {
-            val busqueda = args[1]
-            val condicionBusqueda = args[2]
-            "Ubicación(es) de aparición: " + arbol.buscarArchivosPorNombre(busqueda, condicionBusqueda)
+        else -> {
+            System.err.println("[Main] ¿Cómo llegaste aquí? La cagué re duro en algo")
         }
-
-        4 -> {
-            //arbol.eliminarPalabra()
-            ""
-        }
-        -1 ->{
-            //arbol.eliminarPalabra()
-        }
-        else -> "[Main]No existe esta opción aún"
     }
+}
+
+fun procesarFlags(
+    arbol : Arbol,
+    arquitectura : String,
+    recortar : Int?,
+    readMe : Boolean,
+    descripcion : Boolean,
+    toArchivo : File?
+) : String{
+
+    lateinit var desc : String
+    val nuevaArq =
+        if(recortar != null){
+            val regex = Regex("""(?<= )(?=[^ /.\n]+[/.])|(?<=[^ /.\n])(?=[/.])""")
+
+            arquitectura
+                .split(regex)
+                //.filterNot { it.contains(Regex("[─└├│]")) }
+                //.filter { it.isNotEmpty() }
+                .map{ palabra ->
+                    if(palabra.length > recortar && !palabra.contains(Regex("[─└├│]")))
+                        palabra.take(recortar) + "..."
+                    else
+                        palabra
+                }
+                .toCollection(ArrayList())
+                .unirString()
+                //.toCustomString()
+        }
+        else{
+            arquitectura
+        }
+
+    println(nuevaArq)
+
+    return ""
 }
